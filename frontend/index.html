@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Student Graduation Report</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background:#0f172a;
+            color: #e5e7eb;
+            padding: 40px;
+        }
+
+        .card {
+            background: #1e293b;
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 600px;
+        }
+
+        .pass {
+            color: #22c55e;
+            font-weight: bold;
+        }
+
+        .fail {
+            color: #ef4444;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎓 Student Graduation Report</h1>
+
+    <div class="card" id="student-card">
+        Loading student data...
+    </div>
+
+    <script>
+        const API_URL = "/student";
+
+        const card =document.getElementById("student-card");
+
+        async function fetchStudent() {
+            try {
+                const response = await fetch(API_URL);
+
+                if (!response.ok) {
+                    throw new Error("Failed to fetch Student data");
+                }
+
+                return await response.json();
+            } catch (error) {
+                console.error(error);
+                throw error;
+            }
+        }
+
+        function renderStudent(student) {
+            card.innerHTML= `
+                <h2>${student.name}</h2>
+
+                <p><strong>Age:</strong> ${student.age}</p>
+
+                <p><strong>Average score:</strong> ${student.average_score}</p>
+
+                <p><strong>Final Grade:</strong>
+                    <span class="${student.graduation ? 'pass': 'fail'}">
+                        ${student.average_grade}
+                    </span>
+
+                </p>
+
+                <p class="${student.graduation ? 'pass' : 'fail'}">
+                    ${student.graduation
+                        ? '✅ Eligible to Graduate'
+                        : '❌ Ineligible to Graduate'}
+                </p>
+
+                <h3>Subjects & Marks</h3>
+                <ul>
+                    ${student.subjects.map((subject, i) =>
+                        `<li>${subject}: ${student.marks[i]}</li>`
+                    ).join("")}
+                </ul>
+
+                <p><em>Updated: ${student.timestamp}</em></p>
+
+                `;
+        }
+
+        function showError() {
+            card.innerHTML = `
+                <p class="fail">⚠️ Failed to load student data</p>
+                `;
+        }
+
+        async function init() {
+            card.innerText = "Loading Student Data...";
+
+            try {
+                const student = await fetchStudent();
+                renderStudent(student);
+            } catch {
+                showError();
+            }
+        }
+
+        init();
+    </script>
+</body>
+</html>
